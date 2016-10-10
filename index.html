@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8"/>
+    <title>patient response recorder</title>
+    <title><i class="icon-user icon-black"></i>Patient Response Recorder</title>
+    <script src="https://cdn.rawgit.com/SheetJS/js-xlsx/v0.8.0/dist/xlsx.full.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="./assets/js/app.js"></script>
+	<link rel="stylesheet" href="./assets/css/main.css">
+</head>
+<body ng-controller="MyCtrl">
+    <div id="wrapper">
+        <div class="overlay"></div>
+    
+        <!-- Sidebar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+            <ul class="nav sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                       Apprem
+                    </a>
+                </li>
+                <li>
+                    <a href="/">Dashboard</a>
+                </li>
+                <li>
+                    <a href="#">Sick Weather</a>
+                </li>
+                <li>
+                    <a href="#">Team</a>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Works <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li class="dropdown-header">Send SMS</li>
+                    <li><a href="#">by Mobile Number</a></li>
+                    <li><a href="#">by existing PID</a></li>
+                    <li><a href="#">Select from list</a></li>
+                  </ul>
+                </li>
+                <li>
+                    <a href="#">Services</a>
+                </li>
+                <li>
+                    <a href="#">Contact</a>
+                </li>
+                <li>
+                    <a href="https://twitter.com/maridlcrmn">Follow me</a>
+                </li>
+            </ul>
+        </nav>
+<div id="page-content-wrapper">
+<nav class="navbar navbar-default navbar-fixed-top">
+            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
+                <span class="hamb-top"></span>
+    			<span class="hamb-middle"></span>
+				<span class="hamb-bottom"></span>
+            </button></nav>
+<div class="container-fluid" style="padding-left:60px">
+<div class="container col-lg-12 col-md-12 col-sm-12">
+<h1 align="center">Appointment Reminder Portal</h1>
+<br>
+<form id="upload" method="POST" enctype="multipart/form-data">
+    <fieldset>
+        <input type="hidden" id="MAX_FILE_SIZE" name="MAX_FILE_SIZE" value="300000"/>
+        <div>
+            <label for="fileselect">Excel File Upload</label>
+            <input type="file" id="fileselect" name="fileselect[]" multiple="multiple"/>
+            <div id="filedrag">or drop files here</div>
+        </div>
+    </fieldset>
+</form>
+</div>
+<div id="messages" style="display: none">
+    <p></p>
+</div>
+<table id="customers" style="display: none" class="display" width="100%" cellspacing="0">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>PATIENT</th>
+        <th>MOBILE</th>
+        <th>DATE</th>
+        <th>TIME</th>
+        <th>DOCTOR</th>
+    </tr>
+    </thead>
+    <tbody data-bind="foreach: IDS">
+    <tr>
+        <td data-bind="text:ID"></td>
+        <td data-bind="text:PATIENT"></td>
+        <td data-bind="text:MOBILE"></td>
+        <td data-bind="text:DATE"></td>
+        <td data-bind="text:TIME"></td>
+        <td data-bind="text:DOCTOR"></td>
+    </tr>
+    </tbody>
+</table>
+<script>
+    function toggleTable() {
+        document.getElementById("upload").reset();
+        var myTable = document.getElementById("customers");
+        myTable.style.display = "none";
+        var m = document.getElementById("messages");
+        m.style.display = "";
+        m.innerHTML = "<p>Status : <strong> SMS has been successfully sent to the uploaded reciepients.</strong>";
+    }
+</script>
+<form name="my" method="post" action="/sms1">
+    <input type="hidden" name="field1">
+    <input type="submit" style="display: none" id="btn" onclick="toggleTable();this.style.display = 'none'; ">
+</form>
+<br>
+<div class="container-fluid">
+    <h1 align="center">Appointment Status Dashboard</h1>
+    <table class="table">
+        <thead>
+        <tr>
+            <th ng-repeat="n in listD" style="background:#4CAF50"><font color="white">{{n}}</font></th>
+        </tr>
+        </thead>
+        <thead>
+        <tr>
+            <th>
+                <input class="form-control" type="search" maxlength="9" size="30"
+                       ng-model="filterText.ID"/>
+            </th>
+            <th>
+                <input class="form-control" type="search" maxlength="9" size="30"
+                       ng-model="filterText.PATIENT"/>
+            </th>
+            <th>
+                <input class="form-control" type="search" maxlength="9" size="30"
+                       ng-model="filterText.MOBILE"/>
+            </th>
+            <th>
+                <input class="form-control" type="search" maxlength="9" size="30"
+                       ng-model="filterText.DATE"/>
+            </th>
+            <th>
+                <input class="form-control" type="search" maxlength="9" size="30"
+                       ng-model="filterText.TIME"/>
+            </th>
+            <th>
+                <input class="form-control" type="search" maxlength="9" size="30"
+                       ng-model="filterText.DOCTOR"/>
+            </th>
+            <th>
+                <input class="form-control" type="search" maxlength="9" size="30"
+                       ng-model="filterText.CONFIRMED"/>
+            </th>
+            <th>
+                <input class="form-control" type="search" maxlength="9" size="30"
+                       ng-model="filterText.TIMESTAMP"/>
+            </th>
+        </tr>
+        </thead>
+
+        <hr>
+        <tbody>
+        <tr ng-repeat="n in contactlist1 =(contactlist|filter:filterText| orderBy: TIMESTAMP)">
+            <td>{{n.ID}}</td>
+            <td>{{n.PATIENT}}</td>
+            <td>{{n.MOBILE}}</td>
+            <td>{{n.DATE}}</td>
+            <td>{{n.TIME}}</td>
+            <td>{{n.DOCTOR}}</td>
+            <td>{{n.CONFIRMED}}</td>
+            <td>{{n.TIMESTAMP}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
